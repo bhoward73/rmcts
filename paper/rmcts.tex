@@ -450,52 +450,40 @@ Here \RMCTS has the greatest speed advantage over \MCTS.
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ |c|c|c|c|c|c|c|c|} 
+\begin{tabular}{ |c||ccccccc|} 
  \hline
 $N$ & $32$ & $64$ & $128$ & $256$ & $512$ & $1024$ & $2048$ \\ 
- \hline
  \MCTS & $13$ ms & $25$ ms & $49$ ms & $98$ ms & $200$ ms & $390$ ms & $790$ ms \\ 
- \hline
  \RMCTS & $1.9$ ms & $2.5$ ms & $3.2$ ms & $4.2$ ms & $5.8$ ms & $8.9$ ms & $14$ ms \\ 
- \hline
  speedup & $6.8\times$ & $10\times$ & $16\times$ & $24\times$ & $34\times$ & $44\times$ & $57\times$  \\
  \hline
 \end{tabular}
-
 \caption{Othello timings, one root state.}\label{tab:othello_1}
 \end{table}
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ |c|c|c|c|c|c|c|c|} 
+\begin{tabular}{ |c||ccccccc|} 
  \hline
 $N$ & $32$ & $64$ & $128$ & $256$ & $512$ & $1024$ & $2048$ \\ 
- \hline
  \MCTS & $13$ ms & $25$ ms & $47$ ms & $93$ ms & $190$ ms & $370$ ms & $730$ ms \\ 
- \hline
  \RMCTS & $3.3$ ms & $4.7$ ms & $5.7$ ms & $6.7$ ms & $7.3$ ms & $8.0$ ms & $10$ ms \\ 
- \hline
  speedup & $3.9\times$ & $5.2\times$ & $8.5\times$ & $15\times$ & $26\times$ & $48\times$ & $77\times$  \\
  \hline
 \end{tabular}
-
 \caption{Dots-and-Boxes timings, one root state.}\label{tab:dotbox_1}
 \end{table}
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ |c|c|c|c|c|c|c|c|} 
+\begin{tabular}{ |c||ccccccc|} 
  \hline
 $N$ & $32$ & $64$ & $128$ & $256$ & $512$ & $1024$ & $2048$ \\ 
- \hline
  \MCTS & $18$ ms & $35$ ms & $70$ ms & $150$ ms & $280$ ms & $550$ ms & $1100$ ms \\ 
- \hline
  \RMCTS & $3.8$ ms & $4.9$ ms & $6.8$ ms & $9.2$ ms & $9.7$ ms & $12$ ms & $15$ ms \\ 
- \hline
  speedup & $4.8\times$ & $7.2\times$ & $10\times$ & $16\times$ & $28\times$ & $45\times$ & $74\times$  \\
  \hline
 \end{tabular}
-
 \caption{Connect-4 timings, one root state.}\label{tab:connect4_1}
 \end{table}
 
@@ -514,14 +502,11 @@ an \RMCTS batch consists of all nodes at a given depth across all search trees.
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ |c|c|c|c|c|c|c|c|} 
+\begin{tabular}{ |c||ccccccc|} 
  \hline
 $N$ & $32$ & $64$ & $128$ & $256$ & $512$ & $1024$ & $2048$ \\ 
- \hline
  \MCTS & $0.58$ ms & $1.2$ ms & $2.5$ ms & $5.3$ ms & $12$ ms & $27$ ms & $63$ ms \\ 
- \hline
  \RMCTS & $0.19$ ms & $0.33$ ms & $0.60$ ms & $1.1$ ms & $2.2$ ms & $4.2$ ms & $8.5$ ms \\ 
- \hline
  speedup & $3.1\times$ & $3.5\times$ & $4.1\times$ & $4.7\times$ & $5.5\times$ & $6.6\times$ & $7.3\times$  \\
  \hline
 \end{tabular}
@@ -531,14 +516,11 @@ $N$ & $32$ & $64$ & $128$ & $256$ & $512$ & $1024$ & $2048$ \\
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ |c|c|c|c|c|c|c|c|} 
+\begin{tabular}{ |c||ccccccc|} 
  \hline
 $N$ & $32$ & $64$ & $128$ & $256$ & $512$ & $1024$ & $2048$ \\ 
- \hline
  \MCTS & $0.54$ ms & $1.1$ ms & $2.2$ ms & $4.6$ ms & $9.9$ ms & $23$ ms & $51$ ms \\ 
- \hline
  \RMCTS & $0.15$ ms & $0.22$ ms & $0.33$ ms & $0.57$ ms & $0.92$ ms & $1.7$ ms & $2.8$ ms \\ 
- \hline
  speedup & $3.5\times$ & $4.9\times$ & $6.7\times$ & $8.2\times$ & $10.7\times$ & $13.7\times$ & $18.1\times$  \\
  \hline
 \end{tabular}
@@ -548,14 +530,11 @@ $N$ & $32$ & $64$ & $128$ & $256$ & $512$ & $1024$ & $2048$ \\
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ |c|c|c|c|c|c|c|c|} 
+\begin{tabular}{ |c||ccccccc|} 
  \hline
 $N$ & $32$ & $64$ & $128$ & $256$ & $512$ & $1024$ & $2048$ \\ 
- \hline
  \MCTS & $0.40$ ms & $0.80$ ms & $1.5$ ms & $3.1$ ms & $6.1$ ms & $12$ ms & $25$ ms \\ 
- \hline
  \RMCTS & $0.26$ ms & $0.36$ ms & $0.53$ ms & $0.82$ ms & $1.4$ ms & $2.5$ ms & $4.5$ ms \\ 
- \hline
  speedup & $1.5\times$ & $2.2\times$ & $2.9\times$ & $3.7\times$ & $4.4\times$ & $4.8\times$ & $5.4\times$  \\
  \hline
 \end{tabular}
@@ -597,9 +576,9 @@ The mean time per game was $178$ milliseconds in this case -- still far less tha
 
 \begin{table}[H]
 \centering
-\begin{tabular}{|c|c|c|c|} \hline
-$N$ for \RMCTS & mean score & mean time per game & speedup over \MCTS \\ \hline
-$256$ & $-4.0$ & $135$ milliseconds & $17\times$ \\ \hline
+\begin{tabular}{cccc} \hline
+$N$ for \RMCTS & mean score & mean time per game & speedup over \MCTS \\ \hline \hline
+$256$ & $-4.0$ & $135$ milliseconds & $17\times$ \\ 
 $512$ & $7.2$ & $178$ milliseconds & $13\times$ \\ \hline
 \end{tabular}
 
