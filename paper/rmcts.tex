@@ -436,7 +436,7 @@ $(-3 + 2) / 2 = -0.5 < 1$.
 
 \section{Timings for \MCTS vs \RMCTS for three games}\label{sec:timings}
 In this section we give timing comparisons of \MCTS vs \RMCTS for three games: Connect-4, Dots-and-Boxes, and Othello.
-All timings use TensorRT \cite{nvidia_tensorrt} with {\tt pycuda} to optimize the neural network inferences.
+All timings use TensorRT to optimize the neural network inferences.
 We ran these tests on a desktop computer which has an NVIDIA RTX 3080 GPU, and an Intel i7-10700K CPU.
 In the cases of Dots-and-Boxes and Othello, the network was a ResNet with 8 residual blocks and 48 channels.
 For Connect-4, the network was a ResNet with 8 residual blocks and 64 channels.
