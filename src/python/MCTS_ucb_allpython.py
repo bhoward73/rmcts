@@ -53,7 +53,8 @@ class MonteCarloTree:
         self.root_key = self.root_state.tobytes()
         self.root_policy = self.P[self.root_key]
         self.root_value = self.V[self.root_key]
-        self.Qall = self.root_value * np.ones((0,self.n), dtype=np.float32)
+        self.Qall = np.zeros((0,self.n), dtype=np.float32)
+        #self.Qall = self.root_value * np.ones((0,self.n), dtype=np.float32)
         self.Nall = np.zeros((0,self.n), dtype=np.float32)
         self.UCBall = np.zeros((0,self.n), dtype=np.float32)
         self.cpu_time = 0.0
@@ -65,7 +66,8 @@ class MonteCarloTree:
         pi,v = policy_and_value(self.root_state, self.engine)
         self.P[root_key] = pi
         self.V[root_key] = v
-        self.Q[root_key] = v*np.ones(self.n, dtype=np.float32)
+        self.Q[root_key] = np.zeros(self.n, dtype=np.float32)
+        #self.Q[root_key] = v*np.ones(self.n, dtype=np.float32)
         self.N[root_key] = np.zeros(self.n, dtype=np.float32)
         
     def propagate_value(self, game_path, action_path, value):
@@ -108,7 +110,8 @@ class MonteCarloTree:
                 self.P[gkey] = pi
                 self.V[gkey] = v
                 self.N[gkey] = np.zeros(self.n, dtype=np.float32)
-                self.Q[gkey] = v*np.ones(self.n, dtype=np.float32)
+                self.Q[gkey] = np.zeros(self.n, dtype=np.float32)
+                #self.Q[gkey] = v*np.ones(self.n, dtype=np.float32)
                 value = v * game.playerId(g)
                 self.propagate_value(game_path, action_path, value)
                 break

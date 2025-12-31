@@ -69,7 +69,7 @@ def learn_pi_and_v(G, numSims, nnet, c_puct=None, return_mcts=False):
         return pi, v
 
 
-def select_chunksizes(S,pi):
+def assign_simulations(S,pi):
     '''
     S is a positive integer
     pi is a probability distribution
@@ -357,10 +357,10 @@ def recursive_mcts(game_state, numSims, engine, c_puct, root=True):
     Q = np.zeros(n,dtype=np.float32)
     Q[:] = v0
     N = np.ones(n,dtype=np.float32)
-    action_count = select_chunksizes(numSims-1, pi0)
+    action_count = assign_simulations(numSims-1, pi0)
     action_state_count = defaultdict(int)
     for a in np.argwhere(action_count > 0).ravel():
-        for i in range(action_count[a]):
+        for _ in range(action_count[a]):
             child_state = game.nextState(game_state,a)
             action_state_count[(a, child_state.tobytes())] += 1
     for (a,child_bytes), numSims_child in action_state_count.items():
@@ -381,7 +381,7 @@ def recursive_mcts(game_state, numSims, engine, c_puct, root=True):
     pi1_supp = new_policy_common_ucb_Newton(Q[supp], c_puct, pi0[supp], numSims-1)
     pi1 = np.zeros(n, dtype=np.float32)
     pi1[supp] = pi1_supp
-    v1 = np.dot(Q[supp], pi1_supp)
+    v1 = (v0 + (numSims - 1) * np.dot(Q[supp], pi1_supp)) / numSims
     if root:
         return pi1, v1
     else:
@@ -418,9 +418,9 @@ def learn_pi_Q_from_fixed_policy(g, numSims, engine):
         return pi
 
     # write a minimal variance estimator from here,
-    # using select_chunksizes...
+    # using assign_simulations...
     game_freq = defaultdict(int)
-    af = select_chunksizes(numSims, get_policy(root_state))
+    af = assign_simulations(numSims, get_policy(root_state))
     for a in np.argwhere(af > 0).ravel():
         for i in range(af[a]):
             h = game.nextState(root_state,a)
@@ -437,7 +437,7 @@ def learn_pi_Q_from_fixed_policy(g, numSims, engine):
                 N[a0] += T
                 continue
             pi = get_policy(g)
-            af = select_chunksizes(T, pi)
+            af = assign_simulations(T, pi)
             for a in np.argwhere(af > 0).ravel():
                 for i in range(af[a]):
                     h = game.nextState(g,a)
