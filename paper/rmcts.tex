@@ -312,7 +312,7 @@ Given state $t$, let $\sgn(t) = +1$ if player 1 to move in state $t$, else $-1$\
 \If{$s$ is terminal}{
     \Return{score of $s$, NULL policy}\;
 }
-Let $\sgn(s,t) = +1$ if same active player for states $s$ and $t$, else $-1$\;
+Let $\sgn(s,t) = +1$ if same player is active for states $s$ and $t$, else $-1$\;
 Acquire priors $v_0(s)$ and $\pi_0(s, \cdot)$ from neural network\;
 $N(s,\cdot) \gets \textsc{ASSIGN-SIMULATIONS}(s, N-1, \pi_0(s,\cdot))$; \tcp{\autoref{alg:assign_sims}}
 $A \gets \{ a : N(s,a) > 0 \}$\;
