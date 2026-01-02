@@ -355,7 +355,7 @@ The subroutine \autoref{alg:assign_sims} (ASSIGN-SIMULATIONS) randomly distribut
 prior policy $\pi_0(s,\cdot)$.  Action $a$ is assigned $N(s,a)$ simulations.
 The expectation $\mathbb{E}[N(s,a)] = \pi_0(s,a) N$, 
 and $\lfloor \pi_0(s,a) N \rfloor \leq N(s,a) \leq \lceil \pi_0(s,a) N \rceil$.
-We find it reassuring that every action $a$ is guaranteed to receive at least $\lfloor \pi_0(s,a) N \rfloor$ simulations.
+We note that, in particular, every action $a$ is guaranteed to receive at least $\lfloor \pi_0(s,a) N \rfloor$ simulations.
 Finally, we have $\sum_a N(s,a) = N$.
 
 \begin{algorithm}[H]
