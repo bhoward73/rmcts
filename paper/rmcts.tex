@@ -109,7 +109,7 @@ Each slot pays out a reward of $+1$ or $-1$; the probability of $+1$ is a fixed
 hidden parameter $p$.  For one slot, $p = 0.6$, and for the other, $p = 0.4$.
 The inferior choice ($p = 0.4$) is never abandoned; this action 
 is chosen $\Theta(1/\sqrt{N})$ of the time, where $N$ is the total number of simulations. 
-As $N \to \infty$, the two UCB values get closer and closer together, approaching $0.2 + \Theta(1 / \sqrt{N})$
+As $N \to \infty$, the two UCB values get closer and closer together, approaching $0.2 + \Theta(1 / \sqrt{N})$.
 
 \begin{figure}[h!]
 \centering
@@ -184,7 +184,7 @@ posterior policy $\bar{\pi}$, where the estimated $Q$ values are gotten from the
 By contrast, \RMCTS completely redefines \mbox{MCTS} itself, 
 by using optimized policies not only at the root state, but throughout the tree.     
 The $Q$-values are computed in a recursive manner, where the value of
-    nodes $s'$ in $T$ are approximated (recursively) by computing optimized posterior policies below $s'$. 
+    nodes $s'$ in the search tree are approximated (recursively) by computing optimized posterior policies below $s'$. 
 See \autoref{alg:rmcts} in \autoref{sec:algorithms} for a succinct description of \RMCTS.
 
 
@@ -597,7 +597,7 @@ $256$ & $-4.0$ & $135$ milliseconds & $17\times$ \\
 $512$ & $7.2$ & $178$ milliseconds & $13\times$ \\ \hline
 \end{tabular}
 
-\caption{Bouting \RMCTS vs \MCTS in 64 games of Othello.  
+\caption{Pitting \RMCTS vs \MCTS in 64 games of Othello.  
 Doubling the number of simulations for \RMCTS gives it both a score advantage and speed advantage.}\label{tab:othello_scores_table}
 \end{table}
   
