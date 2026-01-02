@@ -44,8 +44,8 @@ $ make GAME=othello
 this compiles relevant code and puts the results in ./build/othello
 
 To make all three games, run 
-$build_all_games.sh 
-It simply runs "make GAME=othello; make GAME=connect4; make GAME=dotbox;".
+$ ./build_all_games.sh 
+It simply runs "make GAME=connect4; make GAME=dotbox; make GAME=othello;".
 
 The perform your own timings, you can:
 $ python othello_timings.py
