@@ -47,10 +47,13 @@ To make all three games, run
 $ ./build_all_games.sh 
 It simply runs "make GAME=connect4; make GAME=dotbox; make GAME=othello;".
 
-The perform your own timings, you can:
+The perform your own timings (cf. Section 6 of the paper):
 $ python othello_timings.py
 $ python connect4_timings.py
 $ python dotbox_timings.py
+
+To run the Othello quality test (Section 7 of the paper), pitting RMCTS vs MCTS-UCB:
+$ python pit.py
 
 -----------------------------------------------------------------------------
 
