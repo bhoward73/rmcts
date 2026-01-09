@@ -2,7 +2,7 @@
 
 Maintained by 
 Benjamin Howard (bhoward73@gmail.com, or bjhowa3@idaccr.org), and
-Keith Frankston (kmwf1416@fastmail.fm, or k.frankston@idaccr.org)
+Keith Frankston (k.frankston@fastmail.com, or k.frankston@idaccr.org)
 
 
 This repository contains code to compare MCTS-UCB (AlphaZero style) and RMCTS (posterior / optimized policy) implementations and timings, plus tools to run inference with ONNX / TensorRT and PyCUDA. 
