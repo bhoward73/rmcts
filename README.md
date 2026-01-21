@@ -15,6 +15,11 @@ Quick highlights
 - Research code comparing two MCTS variants (timings, experiments).
 - Tools for running TensorRT / ONNX inference and measuring latency.
 
+Docker
+- Build a GPU-ready image from the repo root with `docker build -t rmcts .`.
+- In this case, no manual installs (below) are required.
+
+
 Supported / tested (approx.)
 - Linux with NVIDIA GPU (CUDA) — TensorRT and PyCUDA require a compatible driver + CUDA toolkit.
 - Python 3.8–3.12 (use a virtualenv or conda env).
@@ -37,7 +42,7 @@ Notes about GPU / vendor packages
 - onnxruntime: for GPU inference use `onnxruntime-gpu` that matches your CUDA/cuDNN (or use CPU-only `onnxruntime`).
 
 
-AFTER INSTALLING THE ABOVE PACKAGES:
+AFTER INSTALLING THE ABOVE PACKAGES
 
 To make a particular game, such as Othello:
 $ make GAME=othello
