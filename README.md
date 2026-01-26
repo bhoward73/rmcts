@@ -18,7 +18,10 @@ Quick highlights
 Docker
 - Build a GPU-ready image from the repo root with `docker build -t rmcts .`.
 - In this case, no manual installs (below) are required.
-
+- To use GPU, make sure you configure your docker to have access to your GPUs.
+- Then, `docker run -it --rm --gpus all rmcts` will put you in an interactive shell.
+- From that point, you still need to build by running `./build_all_games.sh`.
+- See below for commands to run the timing and quality tests from sections 6 and 7 of the paper.
 
 Supported / tested (approx.)
 - Linux with NVIDIA GPU (CUDA) — TensorRT and PyCUDA require a compatible driver + CUDA toolkit.
