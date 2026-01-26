@@ -16,6 +16,7 @@ Quick highlights
 - Tools for running TensorRT / ONNX inference and measuring latency.
 
 Docker
+- Thanks to Max-We who prepared the Dockerfile
 - Build a GPU-ready image from the repo root with `docker build -t rmcts .`
 - On my system, it took about eight minutes for this image to be created (w/ fast internet connection)
 - In this case, no manual installs (below) are required.
