@@ -22,6 +22,7 @@ Docker
 - Then, `docker run -it --rm --gpus all rmcts` will put you in an interactive shell.
 - From that point, you still need to build by running `./build_all_games.sh`.
 - See below for commands to run the timing and quality tests from sections 6 and 7 of the paper.
+- When you're finished, running `exit` will exit from the docker interactive shell environment.
 
 Supported / tested (approx.)
 - Linux with NVIDIA GPU (CUDA) — TensorRT and PyCUDA require a compatible driver + CUDA toolkit.
