@@ -16,7 +16,7 @@ Quick highlights
 - Tools for running TensorRT / ONNX inference and measuring latency.
 
 Docker
-- Build a GPU-ready image from the repo root with `docker build -t rmcts .`.
+- Build a GPU-ready image from the repo root with `docker build -t rmcts .`
 - In this case, no manual installs (below) are required.
 - To use GPU, make sure you configure your docker to have access to your GPUs.
 - Then, `docker run -it --rm --gpus all rmcts` will put you in an interactive shell.
