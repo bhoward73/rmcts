@@ -63,8 +63,11 @@ $ python othello_timings.py
 $ python connect4_timings.py
 $ python dotbox_timings.py
 
-To run the Othello quality test (Section 7 of the paper), pitting RMCTS vs MCTS-UCB:
+To run the Othello quality test pitting RMCTS vs MCTS-UCB:
 $ python pit.py
+
+To run the Othello strength saturation test RMCTS vs RMCTS (N sims to N/2 sims):
+$ python saturationtest.py
 
 -----------------------------------------------------------------------------
 
