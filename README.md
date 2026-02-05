@@ -16,15 +16,15 @@ Quick highlights
 - Tools for running TensorRT / ONNX inference and measuring latency.
 
 Docker
-- Build a GPU-ready image from the repo root with `docker build -t rmcts .`
-- On my system, it took about eight minutes for this image to be created (w/ fast internet connection)
 - In this case, no manual installs (below) are required.
-- To use GPU, make sure you configure your docker to have access to your GPUs.
+- Build a GPU-ready image from the repo root with `docker build -t rmcts .`
+- It takes over eight minutes for this image to be created (w/ fast internet connection)
+- To use a GPU, make sure you configure your docker to have access to your GPU(s).
 - Then, `docker run -it --rm --gpus all rmcts` will put you in an interactive shell.
 - From that point, you still need to build by running `./build_all_games.sh`.
 - See below for commands to run the timing and quality tests from sections 6 and 7 of the paper.
 - When you're finished, running `exit` will exit from the docker interactive shell environment.
-- We thank Max-We for preparing this Dockerfile -- we tested it on our system and it worked well.
+- We thank Max-We for preparing this Dockerfile.
 
 Supported / tested (approx.)
 - Linux with NVIDIA GPU (CUDA) — TensorRT and PyCUDA require a compatible driver + CUDA toolkit.
@@ -58,7 +58,7 @@ To make all three games, run
 $ ./build_all_games.sh 
 It simply runs "make GAME=connect4; make GAME=dotbox; make GAME=othello;".
 
-The perform your own timings (cf. Section 6 of the paper):
+To perform your own timings (cf. Section 6 of the paper):
 $ python othello_timings.py
 $ python connect4_timings.py
 $ python dotbox_timings.py
