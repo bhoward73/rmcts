@@ -8,21 +8,19 @@ R.export_tree_json("R_tree.json")
 
 ## 1. Export JSON from Python
 
-If needed, run:
+From the repo root, run:
 
 ```bash
-cd /home/ben/code/rmcts
-/home/ben/anaconda3/envs/torch/bin/python testRMCTS.py
+python testRMCTS.py
 ```
 
 This should create `R_tree.json` in the repo root.
 
 ## 2. Start a tiny local web server
 
-From repo root:
+From the repo root:
 
 ```bash
-cd /home/ben/code/rmcts
 python3 -m http.server 8000
 ```
 
