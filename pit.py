@@ -2,7 +2,9 @@ from time import perf_counter
 import numpy as np
 import matplotlib.pyplot as plt
 
-from build.othello import game, inference, MCTS_ucb, RMCTS
+#from build.othello import game, inference, MCTS_ucb, RMCTS
+from build.connect4 import game, inference, MCTS_ucb, RMCTS
+#from build.dotbox import game, inference, MCTS_ucb, RMCTS
 
 def pit(g0, nnet1, nnet2, numgames, numSims1, c1, numSims2, c2, method1 = 'rmcts', method2 = 'mcts_ucb', temperature=0.2, verbose = False):
     scores_nnet1_first_player = []
@@ -37,7 +39,9 @@ def pit(g0, nnet1, nnet2, numgames, numSims1, c1, numSims2, c2, method1 = 'rmcts
             g = game.nextState(g, a)
             ended, score = game.gameEnded(g)
         
-        scores_nnet1_first_player.append(8 * score * first_player)
+        # othello: score should be multiplied by 8 to obtain checker difference
+        # scores_nnet1_first_player.append(8 * score * first_player)
+        scores_nnet1_first_player.append(score * first_player)
 
         g = g0.copy()
         ended, score = game.gameEnded(g)
@@ -65,13 +69,17 @@ def pit(g0, nnet1, nnet2, numgames, numSims1, c1, numSims2, c2, method1 = 'rmcts
             g = game.nextState(g, a)
             ended, score = game.gameEnded(g)
         
-        scores_nnet1_second_player.append(-8 * score * first_player)
+        # othello: score should be multiplied by 8 to obtain checker difference
+        # scores_nnet1_second_player.append(-8 * score * first_player)
+        scores_nnet1_second_player.append(-score * first_player)
         
         if verbose:
             print(f"after game {i+1:3d}, player1 sum of scores: {sum(scores_nnet1_first_player) + sum(scores_nnet1_second_player):8.0f}.  times = ({time_first_player:8.2f}, {time_second_player:8.2f})")
     if verbose:
         print()
     return scores_nnet1_first_player, scores_nnet1_second_player, time_first_player, time_second_player
+
+
 
 if __name__ == '__main__':
     num_games = 32
@@ -86,7 +94,9 @@ if __name__ == '__main__':
     p1 = f"({method1}, {N1} {C1})"
     p2 = f"({method2}, {N2} {C2})"
 
-    print("Othello MCTS Pit!")
+    #print("Othello MCTS Pit!")
+    print("Connect4 MCTS Pit!")
+    
 
     print(f"Playing {num_games} games.")
     print(f"Each game is really two games, with players alternating who goes first.")
@@ -95,7 +105,9 @@ if __name__ == '__main__':
     print(f"Temperature used = {temperature} (smaller/colder approaches argmax policy)")
 
     print("loading network engine...")
-    nnet1 = inference.Engine("./othello/models/ResNet_8blocks_48channels.onnx")
+    #nnet1 = inference.Engine("./othello/models/ResNet_8blocks_48channels.onnx")
+    nnet1 = inference.Engine("./connect4/models/ResNet_8blocks_64channels.onnx")
+    #nnet1 = inference.Engine("./dotbox/models/ResNet_8blocks_48channels.onnx")
     nnet2 = nnet1
     print("finishing loading network engine.")
     g0 = game.rootState()
@@ -112,6 +124,9 @@ if __name__ == '__main__':
                                                     method2=method2, 
                                                     temperature=temperature,
                                                     verbose = True)
+    
+    print(f"Scores as first player: {scores_as_first}")
+    print(f"Scores as second player: {scores_as_second}")
 
     print(f"Average score of player1 = {np.mean(scores_as_first + scores_as_second)}")
     print(f"Total time taken for {p1}:", t1)
@@ -148,6 +163,9 @@ if __name__ == '__main__':
                                                     method2=method2, 
                                                     temperature=temperature,
                                                     verbose = True)
+
+    print(f"Scores as first player: {scores_as_first}")
+    print(f"Scores as second player: {scores_as_second}")
 
     print(f"Average score of player1 = {np.mean(scores_as_first + scores_as_second)}")
     print(f"Total time taken for {p1}:", t1)

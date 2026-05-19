@@ -1,4 +1,5 @@
 import numpy as np
+import json
 from collections import defaultdict
 import matplotlib.pyplot as plt
 from time import perf_counter
@@ -449,3 +450,264 @@ def learn_pi_Q_from_fixed_policy(g, numSims, engine):
     u, pi1 = new_policy_common_ucb_Newton(Q, metaparm.c_puct, pi, numSims)
 
     return pi1, Q
+
+class RMCTS_Tree:
+    def __init__(self, root_state, engine):
+        self.root_state = root_state
+        self.engine = engine
+        self.capacity = 256
+        self.num_rows = 1
+        ended, score = game.gameEnded(root_state)
+        assert not ended
+        self.P = np.zeros((self.capacity, game.numActions()), dtype=np.float32)
+        self.v = np.zeros(self.capacity, dtype=np.float32)
+        self.Q = np.zeros((self.capacity, game.numActions()), dtype=np.float32)
+        self.N = np.zeros((self.capacity, game.numActions()), dtype=np.float32)
+        self.parent = np.zeros(self.capacity, dtype=np.int32)
+        self.a0 = np.zeros(self.capacity, dtype=np.int32)
+        self.state = np.zeros((self.capacity, game.gameLength()), dtype=np.float32)
+        self.total_sims = np.zeros(self.capacity, dtype=np.int32)
+        self.new_sims = np.zeros(self.capacity, dtype=np.int32)
+        self.new_sims_children = np.zeros(self.capacity, dtype=np.int32)
+        self.node_type = np.zeros(self.capacity, dtype=np.int8)
+        self.child_index = np.zeros((self.capacity, game.numActions()), dtype=np.int32)
+        self.depth = np.zeros(self.capacity, dtype=np.int32)
+        self.path_logit = np.zeros(self.capacity, dtype=np.float32)
+        # node types:
+        # 0 = needs inference, not terminal
+        # 1 = does not need inference, not terminal (current policy and value v are known)
+        # 2 = terminal
+        self.state[0] = root_state
+        self.parent[0] = -1
+        self.a0[0] = -1
+        self.node_type[0] = 0
+        self.depth[0] = 0
+        self.child_index[0,:] = -1
+
+    @property
+    def nrows(self):
+        return self.num_rows
+
+    def _expand(self):
+        assert self.capacity < (1<<24) # just to be safe, since we use int32 for indices
+        old_capacity = self.capacity
+        self.capacity *= 2
+        n = game.numActions()
+
+        def _grow_2d(arr, rows, cols):
+            new = np.zeros((rows, cols), dtype=arr.dtype)
+            new[:old_capacity] = arr[:old_capacity]
+            return new
+
+        def _grow_1d(arr, rows):
+            new = np.zeros(rows, dtype=arr.dtype)
+            new[:old_capacity] = arr[:old_capacity]
+            return new
+
+        self.P           = _grow_2d(self.P,           self.capacity, n)
+        self.Q           = _grow_2d(self.Q,           self.capacity, n)
+        self.N           = _grow_2d(self.N,           self.capacity, n)
+        self.child_index = _grow_2d(self.child_index, self.capacity, n)
+        self.state       = _grow_2d(self.state,       self.capacity, game.gameLength())
+        self.v                 = _grow_1d(self.v,                 self.capacity)
+        self.parent            = _grow_1d(self.parent,            self.capacity)
+        self.a0                = _grow_1d(self.a0,                self.capacity)
+        self.total_sims        = _grow_1d(self.total_sims,        self.capacity)
+        self.new_sims          = _grow_1d(self.new_sims,          self.capacity)
+        self.new_sims_children = _grow_1d(self.new_sims_children, self.capacity)
+        self.node_type         = _grow_1d(self.node_type,         self.capacity)
+        self.depth             = _grow_1d(self.depth,             self.capacity)
+        self.path_logit        = _grow_1d(self.path_logit,        self.capacity)
+
+    def _add_child(self, parent_index, a):
+        '''
+        adds new node to tree if it isn't already present
+        returns index of child node
+        '''
+        assert parent_index >= 0 and parent_index < self.num_rows
+        g = self.state[parent_index]
+        h = game.nextState(g, a)
+        ended_h, score_h = game.gameEnded(h)
+        if self.child_index[parent_index, a] == -1:
+            # add new entry
+            if self.capacity == self.num_rows:
+                # make room for new entry
+                self._expand()
+            child_index = self.num_rows
+            self.num_rows += 1
+            self.state[child_index] = h
+            self.child_index[parent_index,a] = child_index
+            self.parent[child_index] = parent_index
+            self.a0[child_index] = a
+            self.depth[child_index] = self.depth[parent_index] + 1
+            self.node_type[child_index] = 0 # new, needs inference if nonterminal
+            self.child_index[child_index,:] = -1 # initialize child indices to -1
+            self.path_logit[child_index] = self.path_logit[parent_index] + np.log2(self.P[parent_index,a])
+        else:
+            child_index = self.child_index[parent_index,a]
+            self.node_type[child_index] = 1 # not new (might be terminal; if so later change to 2)
+        if ended_h:
+            self.node_type[child_index] = 2 # terminal
+            self.v[child_index] = score_h * game.playerId(h)
+        return child_index
+    
+    def _get_inferences(self, indices):
+        '''
+        gets network policy and value for indicated states
+        and records P and v entries for these states
+        changes node type to 1 for these states
+        '''
+        assert np.all(self.node_type[indices] == 0)
+        states = self.state[indices]
+        pi, v = self.engine(states)
+        self.P[indices] = pi
+        self.v[indices] = v.flatten()
+        self.node_type[indices] = 1
+
+    def _legalize_policies(self, indices):
+        for i in indices:
+            g = self.state[i]
+            actions = game.getValidActions(g)
+            if len(actions) == 0:
+                assert self.node_type[i] == 2
+                continue
+            pi_legal = np.zeros(game.numActions(), dtype=np.float32)
+            pi_legal[actions] = self.P[i,actions]
+            if np.sum(pi_legal) > 0.0:
+                pi_legal /= np.sum(pi_legal)
+            else:
+                pi_legal[actions] = 1.0 / len(actions)
+            self.P[i] = pi_legal
+
+    def _expand_node(self, i, temperature):
+        '''
+        adds (potentially) new children C to node at index i
+        returns C_nonterminal, C_terminal
+        '''
+        C_nonterminal = []
+        C_terminal = []
+        n = self.new_sims_children[i]
+        if n == 0:
+            # no budget so returning empty lists
+            return C_nonterminal, C_terminal
+        pi = self.P[i]
+        actions = np.argwhere(pi > 0.0).flatten()
+        #print(f"_expand_node: {i} has {n} sims, legal actions {actions}, pi {pi[actions]}")
+        pi_actions = np.power(pi[actions], 1.0/temperature)
+        pi_actions /= np.sum(pi_actions)
+        s = assign_simulations(n, pi_actions)
+        #print(f"_expand_node: s = {s}")
+        s_POS = np.argwhere(s > 0).flatten()
+        A = actions[s_POS]
+        #print(f"_expand_node: actions A = {A}")
+        for p in s_POS:
+            a = actions[p]
+            child_index = self._add_child(i, a)
+            self.new_sims[child_index] += s[p]
+            if self.node_type[child_index] < 2:
+                self.new_sims_children[child_index] += s[p]
+            #print(f"_expand_node: {s[p]} sims assigned to child {child_index} for action {a}, node_type {self.node_type[child_index]}, new_sims_children {self.new_sims_children[child_index]}")
+            if self.node_type[child_index] < 2:
+                C_nonterminal.append(child_index)
+            else:
+                C_terminal.append(child_index)
+        return C_nonterminal, C_terminal
+
+    def explore(self, numSims, temperature=1.0):
+        assert temperature > 0.0
+        # run numSims simulations of RMCTS
+        if numSims <= 0:
+            return
+        self.new_sims[0] += numSims
+        self.new_sims_children[0] += numSims # might be reduced by 1 if we do inference at the root, but we will fix that later
+        T = set([0]) # set of nodes (indices) in this new tree to explore, initialized with the root node
+        S_nonterminal = [0] # stack of node (indices) at current depth in T
+        S_terminal = []
+        leaves = set() # indices of leaf nodes : either terminal state, or no sims for children.
+        depth = 0
+        while numSims > 0 and len(S_nonterminal) > 0:
+            inference_stack = [i for i in S_nonterminal if self.node_type[i] == 0]
+            if len(inference_stack) > 0:
+                # run inference on the inference stack (expensive step, so we want to do it in batches)
+                self._get_inferences(inference_stack)
+                # legalize each new policy
+                self._legalize_policies(inference_stack)
+            # update sim counts for children budget
+            for i in inference_stack:
+                # decrement children budget by 1 because parent consumed 1 sim
+                self.new_sims_children[i] -= 1
+                numSims -= 1
+            # assign sims to individual children of nodes in S_nonterminal
+            C_nonterminal = []
+            C_terminal = []
+            for i in S_nonterminal:
+                n_children = self.new_sims_children[i]
+                if n_children == 0:
+                    leaves.add(i)
+                    continue
+                Ci_nonterminal, Ci_terminal = self._expand_node(i, temperature)
+                C_nonterminal.extend(Ci_nonterminal)
+                C_terminal.extend(Ci_terminal)
+            S_nonterminal = C_nonterminal
+            S_terminal = C_terminal
+            depth += 1
+            T.update(S_nonterminal)
+            T.update(S_terminal)
+            leaves.update(S_terminal)
+            print(f"explore: depth {depth}, num_nodes {len(T)}, numSims {numSims}")
+        return T, leaves
+
+    def export_tree_json(self, file_path, max_row=None):
+        '''
+        Export the currently explored tree to a JSON file.
+
+        Node i gets label self.v[i].
+        Edge parent(i) -> i gets label action self.a0[i].
+
+        Parameters
+        ----------
+        file_path : str or Path
+            Output JSON path.
+        max_row : int or None
+            Optional inclusive upper row bound. If None, exports through
+            self.num_rows - 1.
+        '''
+        if max_row is None:
+            last_row = self.num_rows - 1
+        else:
+            last_row = min(int(max_row), self.num_rows - 1)
+        if last_row < 0:
+            raise ValueError('tree is empty, nothing to export')
+
+        nodes = []
+        edges = []
+
+        for i in range(last_row + 1):
+            nodes.append({
+                'id': int(i),
+                'label': float(self.v[i]),
+            })
+
+            if i == 0:
+                continue
+            p = int(self.parent[i])
+            if p < 0 or p > last_row:
+                continue
+            edges.append({
+                'source': p,
+                'target': int(i),
+                'label': int(self.a0[i]),
+            })
+
+        payload = {
+            'root': 0,
+            'nrows': int(last_row + 1),
+            'nodes': nodes,
+            'edges': edges,
+        }
+
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(payload, f, indent=2)
+
+        return payload
+
