@@ -67,6 +67,13 @@ $ python pit.py
 To run the Othello strength saturation test RMCTS vs RMCTS (N sims to N/2 sims):
 $ python saturationtest.py
 
+To visualize the RMCTS search tree for Othello:
+$ python testRMCTS.py          # builds the tree and writes R_tree.json
+$ python3 -m http.server 8000  # start a local web server
+Then open http://localhost:8000/tree_viewer.html in your browser and click "Load R_tree.json".
+Cytoscape.js is loaded from CDN so no additional install is required.
+Note: this uses the ONNX model (othello/models/ResNet_8blocks_48channels.onnx) and requires a GPU.
+
 -----------------------------------------------------------------------------
 
 Copyright (c) 2025, Institute for Defense Analyses, 730 Glebe Rd, Alexandria, VA 22305-3086; 703-845-2500
