@@ -58,8 +58,14 @@ void* MCTS_init(int const num_lanes,
 void MCTS_free(void* mcts);
 
 
-// completely flushes the new_stack
-// and populates the inference_stack with whatever inferences are required
+// Stage 1: completely flushes the new_stack and populates the inference_stack
+// with whatever inferences are required. Terminal states are stored as rows
+// in the tree but are not propagated. Leaf nodes (sims==1) are also left
+// in place. No propagation occurs during Stage 1.
 void MCTS_flush_new_stack(void* const mcts);
+
+// Stage 2: propagate values bottom-up through the completed tree.
+// Call this once after the tree is fully built (inference_stack is empty).
+void MCTS_propagate_all(void* const mcts);
 
 

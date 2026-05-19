@@ -2,8 +2,8 @@ from time import perf_counter
 import numpy as np
 import matplotlib.pyplot as plt
 
-#from build.othello import game, inference, MCTS_ucb, RMCTS
-from build.connect4 import game, inference, MCTS_ucb, RMCTS
+from build.othello import game, inference, MCTS_ucb, RMCTS
+#from build.connect4 import game, inference, MCTS_ucb, RMCTS
 #from build.dotbox import game, inference, MCTS_ucb, RMCTS
 
 def pit(g0, nnet1, nnet2, numgames, numSims1, c1, numSims2, c2, method1 = 'rmcts', method2 = 'mcts_ucb', temperature=0.2, verbose = False):
@@ -94,8 +94,9 @@ if __name__ == '__main__':
     p1 = f"({method1}, {N1} {C1})"
     p2 = f"({method2}, {N2} {C2})"
 
-    #print("Othello MCTS Pit!")
-    print("Connect4 MCTS Pit!")
+    print("Othello MCTS Pit!")
+    #print("Connect4 MCTS Pit!")
+    #print("DotBox MCTS Pit!")
     
 
     print(f"Playing {num_games} games.")
@@ -105,8 +106,8 @@ if __name__ == '__main__':
     print(f"Temperature used = {temperature} (smaller/colder approaches argmax policy)")
 
     print("loading network engine...")
-    #nnet1 = inference.Engine("./othello/models/ResNet_8blocks_48channels.onnx")
-    nnet1 = inference.Engine("./connect4/models/ResNet_8blocks_64channels.onnx")
+    nnet1 = inference.Engine("./othello/models/ResNet_8blocks_48channels.onnx")
+    #nnet1 = inference.Engine("./connect4/models/ResNet_8blocks_64channels.onnx")
     #nnet1 = inference.Engine("./dotbox/models/ResNet_8blocks_48channels.onnx")
     nnet2 = nnet1
     print("finishing loading network engine.")

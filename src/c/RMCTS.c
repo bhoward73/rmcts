@@ -487,10 +487,8 @@ void MCTS_flush_new_stack(void* const mcts)
   int i0;
   // int i;
   int numSims;
-  int p;
-  int a0,a;
-  float v0, v_child;
-  float player_g, player_h;
+  int a;
+  float player_h;
   float* g;
   float* h;
   float* pi0;
@@ -514,20 +512,15 @@ void MCTS_flush_new_stack(void* const mcts)
     t->new_stack_size[0]--;
     numSims = t->sims[i0];
     assert(numSims >= 1);
-    p = t->parent[i0];
-    a0 = t->a0[i0];
-    v0 = t->value[i0];
-    player_g = playerId(g);
 
     // legalize the prior policy pi0 in the lookup table
     pi0 = t->policy + i0*n;       
     legalize_policy(pi0_legal, pi0, g);
     memcpy(t->policy + i0*n, pi0_legal, n*sizeof(float));
 
-    // if this is a leaf node, then propagate the value
+    // Stage 1: if this is a leaf node, leave it in the tree.
+    // Propagation is deferred to MCTS_propagate_all (Stage 2).
     if(numSims == 1) {
-      propagate(t, p, a0, v0, 1, player_g);
-      t->sims_remaining[i0] = 0;
       continue;
     }
 
@@ -539,25 +532,70 @@ void MCTS_flush_new_stack(void* const mcts)
       nextState(h, g, a);
       player_h = playerId(h);
       ended = gameEnded(&score, h);
-      if(ended) {
-        v_child = score * player_h;
-        propagate(t, i0, a, v_child, action_counts[a], player_h);
-        continue;
-      }
       m = t->row_count[0];
       memcpy(t->G + m*gamesize, h, gamesize*sizeof(float));
       t->parent[m] = i0;
       t->a0[m] = a;
       t->sims[m] = action_counts[a];
       t->sims_remaining[m] = action_counts[a];
+      t->row_count[0]++;
+      if(ended) {
+        // Stage 1: terminal child gets a row but no inference.
+        // Its value is stored here; propagation is deferred to Stage 2.
+        t->value[m] = score * player_h;
+        continue;
+      }
       t->inference_stack[*(t->inference_stack_size)] = m;
       t->inference_stack_size[0]++;
-      t->row_count[0]++;
     }
   }
   free(pi0_legal);
   free(action_counts);
   free(h);
+}
+
+
+// Stage 2: propagate values bottom-up through the completed tree.
+// Must be called after MCTS_flush_new_stack has returned with an empty
+// inference_stack, i.e., after the entire tree T has been built.
+// Iterates nodes in reverse allocation order (children always have higher
+// indices than their parents), so every child is processed before its parent.
+void MCTS_propagate_all(void* const mcts)
+{
+  MCTS_new_t* t = (MCTS_new_t*) mcts;
+  int i;
+  float v_i;
+  int sims_i;
+  float player_id_i;
+  int gamesize = gameLength();
+
+  for(i = *(t->row_count) - 1; i >= t->num_lanes; i--) {
+    if(t->sims[i] == 1) {
+      // leaf: nnet value, no children
+      v_i = t->value[i];
+      sims_i = 1;
+    } else if(t->sims_remaining[i] == t->sims[i]) {
+      // terminal: no children updated this node in Stage 1
+      v_i = t->value[i];
+      sims_i = t->sims[i];
+    } else {
+      // internal: all children have updated Q and N via update_parent
+      assert(t->sims_remaining[i] == 1);
+      v_i = compute_new_value_nonroot(t, i);
+      sims_i = t->sims[i];
+    }
+    player_id_i = playerId(t->G + i * gamesize);
+    update_parent(t, t->parent[i], t->a0[i], v_i, sims_i, player_id_i);
+    t->sims_remaining[i] = 0;
+  }
+
+  // finalize root nodes
+  for(i = 0; i < t->num_lanes; i++) {
+    assert(t->sims_remaining[i] == 1);
+    compute_new_value_and_policy_root(t, i);
+    t->sims_remaining[i] = 0;
+    t->num_completed[0]++;
+  }
 }
 
 

@@ -30,6 +30,9 @@ libRMCTS.MCTS_free.argtypes = [ptr_void]
 libRMCTS.MCTS_flush_new_stack.restype = None
 libRMCTS.MCTS_flush_new_stack.argtypes = [ptr_void]
 
+libRMCTS.MCTS_propagate_all.restype = None
+libRMCTS.MCTS_propagate_all.argtypes = [ptr_void]
+
 def mcts_data(G, numSims, nnet, c_puct=None):
     if c_puct is None:
         c_puct = metaparm.c_puct
@@ -263,6 +266,9 @@ class MCTS:
     def flush_new_stack(self):
         libRMCTS.MCTS_flush_new_stack(self._t)
 
+    def propagate_all(self):
+        libRMCTS.MCTS_propagate_all(self._t)
+
     def flush_inference_stack(self,batchsize_only=False):
         # flushes the inference stack
         if batchsize_only:
@@ -292,7 +298,8 @@ class MCTS:
         self.gpu_times.append(t1 - t0)
         t0 = t1
 
-        while self.num_completed[0] < self.num_lanes:
+        # Stage 1: build the entire tree T
+        while True:
             self.flush_new_stack()
             t1 = perf_counter()
             self.cpu_times.append(t1 - t0)
@@ -302,6 +309,13 @@ class MCTS:
             t2 = perf_counter()
             self.gpu_times.append(t2 - t1)
             t0 = t2
+
+        # Stage 2: propagate values from leaves up to the roots
+        t0 = perf_counter()
+        self.propagate_all()
+        t1 = perf_counter()
+        self.cpu_times.append(t1 - t0)
+
         return self.new_policy, self.new_value
 
     def __call__(self, batchsize_only=False):
