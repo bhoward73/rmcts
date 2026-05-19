@@ -49,30 +49,42 @@ Notes about GPU / vendor packages
 AFTER INSTALLING THE ABOVE PACKAGES
 
 To make a particular game, such as Othello:
-$ make GAME=othello
+```bash
+make GAME=othello
+```
 this compiles relevant code and puts the results in ./build/othello
 
-To make all three games, run 
-$ ./build_all_games.sh 
+To make all three games, run:
+```bash
+./build_all_games.sh
+```
 It simply runs "make GAME=connect4; make GAME=dotbox; make GAME=othello;".
 
 To perform your own timings (cf. Section 6 of the paper):
-$ python othello_timings.py
-$ python connect4_timings.py
-$ python dotbox_timings.py
+```bash
+python othello_timings.py
+python connect4_timings.py
+python dotbox_timings.py
+```
 
 To run the Othello quality test pitting RMCTS vs MCTS-UCB:
-$ python pit.py
+```bash
+python pit.py
+```
 
 To run the Othello strength saturation test RMCTS vs RMCTS (N sims to N/2 sims):
-$ python saturationtest.py
+```bash
+python saturationtest.py
+```
 
-To visualize the RMCTS search tree for Othello:
-$ python testRMCTS.py          # builds the tree and writes R_tree.json
-$ python3 -m http.server 8000  # start a local web server
-Then open http://localhost:8000/tree_viewer.html in your browser and click "Load R_tree.json".
-Cytoscape.js is loaded from CDN so no additional install is required.
-Note: this uses the ONNX model (othello/models/ResNet_8blocks_48channels.onnx) and requires a GPU.
+To visualize the RMCTS search tree for Othello (requires a GPU):
+```bash
+python testRMCTS.py
+python3 -m http.server 8000
+```
+Then open http://localhost:8000/tree_viewer.html and click "Load R_tree.json".
+Cytoscape.js is loaded from CDN; no additional install is required.
+See TREE_VIEWER.md for more details.
 
 -----------------------------------------------------------------------------
 
