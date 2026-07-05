@@ -8,7 +8,8 @@ Keith Frankston (k.frankston@fastmail.com, or k.frankston@idaccr.org)
 This repository contains code to compare MCTS-UCB (AlphaZero style) and RMCTS (posterior / optimized policy) implementations and timings, plus tools to run inference with ONNX / TensorRT and PyCUDA. 
 
 This code supports our ICML paper on RMCTS: 
-https://openreview.net/forum?id=oo9523XUWI&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICML.cc%2F2026%2FConference%2FAuthors%23your-submissions)
+[paper](https://openreview.net/forum?id=oo9523XUWI&referrer=%5BAuthor%20Console%5D%28%2Fgroup%3Fid%3DICML.cc%2F2026%2FConference%2FAuthors%23your-submissions%29)
+
 
 The RMCTS code (the focus of this git repo) can be found in src/c/rmcts.c
 
